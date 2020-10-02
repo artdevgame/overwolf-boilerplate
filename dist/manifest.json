@@ -1,0 +1,82 @@
+{
+  "manifest_version": 1,
+  "type": "WebApp",
+  "meta": {
+    "author": "Mike Holloway",
+    "description": "Opinionated setup of a new Overwolf project",
+    "dock_button_title": "Overwolf Boilerplate",
+    "icon_gray": "icon.png",
+    "icon": "icon.png",
+    "launcher_icon": "icon.png",
+    "minimum-gep-version": "128.0.0.1",
+    "minimum-gs-version": "128.0.0.1",
+    "minimum-overwolf-version": "0.155.0.8",
+    "name": "overwolf-boilerplate",
+    "splash_image": "icon.png",
+    "version": "1.0.0",
+    "window_icon": "icon.png"
+  },
+  "permissions": [],
+  "data": {
+    "developer": {
+      "enable_auto_refresh": true
+    },
+    "force_browser": "user",
+    "game_events": [10902, 5426],
+    "game_targeting": {
+      "type": "dedicated",
+      "game_ids": [10902, 5426]
+    },
+    "hotkeys": {
+      "toggle_app": {
+        "action-type": "custom",
+        "default": "CTRL+B",
+        "title": "App Ready Toggle"
+      }
+    },
+    "launch_events": [{ "event": "GameLaunch", "event_data": { "game_ids": [10902] }, "start_minimized": true }],
+    "permissions": ["GameInfo", "Hotkeys"],
+    "process_name": "Overwolf Boilerplate",
+    "start_window": "background",
+    "windows": {
+      "background": {
+        "file": "files/index.html",
+        "is_background_page": true
+      },
+      "desktop": {
+        "file": "files/index.html",
+        "desktop_only": true,
+        "native_window": true,
+        "size": {
+          "height": 600,
+          "width": 800
+        },
+        "transparent": true,
+        "use_os_windowing": true
+      },
+      "in-game-mini": {
+        "block_top_window_navigation": true,
+        "file": "files/index.html",
+        "focus_game_takeover": "ReleaseOnHidden",
+        "in_game_only": true,
+        "resizable": false,
+        "transparent": true,
+        "size": {
+          "height": 200,
+          "width": 200
+        }
+      },
+      "in-game-full": {
+        "block_top_window_navigation": true,
+        "file": "files/index.html",
+        "focus_game_takeover": "ReleaseOnHidden",
+        "in_game_only": true,
+        "transparent": true,
+        "size": {
+          "height": 200,
+          "width": 400
+        }
+      }
+    }
+  }
+}
