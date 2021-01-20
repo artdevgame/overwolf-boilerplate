@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 const overwolfNs = overwolf.games;
 
-export const useGame = (classId: number) => {
+export const useGame = (classId?: number) => {
   const [isRunning, setIsRunning] = useState(false);
   const [gameInfo, setGameInfo] = useState<overwolf.games.GameInfo | overwolf.games.RunningGameInfo>();
 
@@ -26,10 +26,9 @@ export const useGame = (classId: number) => {
     overwolfNs.onGameInfoUpdated.addListener(onUpdated);
 
     overwolfNs.getRunningGameInfo((info) => {
-      if (info?.classId === classId) {
-        setIsRunning(true);
-        setGameInfo(info);
-      }
+      if (info === null || (typeof classId !== 'undefined' && info.classId !== classId)) return;
+      setIsRunning(true);
+      setGameInfo(info);
     });
 
     return () => {

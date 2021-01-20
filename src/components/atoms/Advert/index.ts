@@ -1,0 +1,1 @@
+export { Advert } from './Advert'

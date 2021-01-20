@@ -1,4 +1,3 @@
-import retry from 'async-retry';
 import { useCallback, useEffect, useState } from 'react';
 
 interface CloseWindow {
@@ -26,6 +25,7 @@ interface ToggleWindow {
 }
 
 export const useWindowManager = () => {
+  const [lastWindowOpened, setLastWindowOpened] = useState<overwolf.windows.WindowInfo>()
   const [domWindows, setDomWindows] = useState<overwolf.Dictionary<Window>>();
 
   const closeWindow = useCallback(async ({ name }: CloseWindow) => {
@@ -33,7 +33,23 @@ export const useWindowManager = () => {
     overwolf.windows.close(owWindow.id);
   }, []);
 
-  const getOpenWindow = useCallback(({ name }: GetOpenWindow) => {
+  const getCurrentWindow = useCallback((): Promise<overwolf.windows.WindowInfo> =>
+    new Promise((resolve, reject) => {
+      overwolf.windows.getCurrentWindow(result => {
+        if (result.success) {
+          return resolve(result.window);
+        }
+
+        if (typeof result.error !== 'undefined') {
+          return reject(result.error);
+        }
+
+        return reject('Unable to fetch current window info');
+      })
+    })
+    , []);
+
+  const getDomWindow = useCallback(({ name }: GetOpenWindow) => {
     if (typeof domWindows !== 'undefined') {
       for (const [owWindowName, domWindow] of Object.entries(domWindows)) {
         if (owWindowName === name) {
@@ -53,6 +69,8 @@ export const useWindowManager = () => {
         if (typeof result.error !== 'undefined') {
           return reject(result.error);
         }
+
+        return reject(`Unable to fetch window info with name: ${name}`);
       });
     }), []);
 
@@ -63,6 +81,7 @@ export const useWindowManager = () => {
   const openWindow = useCallback(async ({ name }: OpenWindow) => {
     const owWindow = await getWindow({ name });
     overwolf.windows.restore(owWindow.id);
+    setLastWindowOpened(owWindow);
   }, []);
 
   const toggleWindow = useCallback(async ({ name }: ToggleWindow) => {
@@ -91,8 +110,10 @@ export const useWindowManager = () => {
   return {
     closeWindow,
     domWindows,
-    getOpenWindow,
+    getCurrentWindow,
+    getDomWindow,
     getWindow,
+    lastWindowOpened,
     moveWindow,
     openWindow,
     toggleWindow,
