@@ -1,7 +1,15 @@
+interface GetCurrentWindowProps {
+  onWindowObtained?(windowInfo: overwolf.windows.WindowInfo): void;
+}
 interface GetWindowProps {
   windowName: string;
   windowSettings?: overwolf.windows.WindowProperties | undefined;
 }
+
+interface GetWindowStateProps extends GetWindowProps {
+  onWindowStateRetrieved(windowStateResult: overwolf.windows.GetWindowStateResult): void;
+}
+
 interface OpenWindowProps extends GetWindowProps {
   onWindowOpened?(windowInfo: overwolf.windows.WindowInfo): void;
 }
@@ -21,13 +29,17 @@ async function closeWindow({ windowName }: CloseWindowProps) {
   overwolf.windows.close(owWindow.id);
 }
 
-function getCurrentWindow(): Promise<overwolf.windows.WindowInfo> {
+function getCurrentWindow({ onWindowObtained }: GetCurrentWindowProps = {}): Promise<overwolf.windows.WindowInfo> {
   return new Promise((resolve, reject) => {
-    const onWindowObtained = (result: overwolf.windows.WindowResult) => {
-      result.success ? resolve(result.window) : reject(result.error);
+    const handleWindowObtained = (result: overwolf.windows.WindowResult) => {
+      if (result.success) {
+        if (typeof onWindowObtained === 'function') onWindowObtained(result.window);
+        resolve(result.window);
+      }
+      reject(result.error);
     };
 
-    overwolf.windows.getCurrentWindow(onWindowObtained);
+    overwolf.windows.getCurrentWindow(handleWindowObtained);
   });
 }
 
@@ -43,6 +55,12 @@ function getWindow({ windowName, windowSettings }: GetWindowProps): Promise<over
 
     overwolf.windows.obtainDeclaredWindow(windowName, onWindowObtained);
   });
+}
+
+async function getWindowState({ windowName, onWindowStateRetrieved }: GetWindowStateProps) {
+  const owWindow = await getWindow({ windowName });
+
+  overwolf.windows.getWindowState(owWindow.id, onWindowStateRetrieved);
 }
 
 async function moveWindow({ windowName }: MoveWindowProps) {
@@ -80,6 +98,7 @@ export const useWindowManager = () => ({
   closeWindow,
   getCurrentWindow,
   getWindow,
+  getWindowState,
   moveWindow,
   openWindow,
   resizeWindow,

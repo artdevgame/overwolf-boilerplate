@@ -1,19 +1,21 @@
 import './app-header.less';
 
 import React, { FC } from 'react';
-import { CloseButton } from '~components/atoms/CloseButton';
-import { SettingsButton } from '~components/atoms/SettingsButton';
-import { AppHeaderActions } from '~components/molecules/AppHeaderActions';
-import { useWindowManager } from '~hooks/overwolf/useWindowManager';
-import { WindowName } from '~typescript/enums/WindowName';
-
-import Logo from './logo.svg';
+import { WindowName } from '~/src/@types/enums/WindowName';
+import { CloseButton } from '~src/components/atoms/CloseButton';
+import { Logo } from '~src/components/atoms/Logo/Logo';
+import { SettingsButton } from '~src/components/atoms/SettingsButton';
+import { AppHeaderActions } from '~src/components/molecules/AppHeaderActions';
+import { useWindowManager } from '~src/hooks/overwolf/useWindowManager';
 
 export const InGameFullAppHeader: FC = () => {
   const { moveWindow } = useWindowManager();
   return (
-    <div className='AppHeader InGameFullAppHeader' onMouseDown={() => moveWindow({ windowName: WindowName.IN_GAME_MINI })}>
-      <Logo className='AppHeader__Logo' />
+    <div
+      className="AppHeader InGameFullAppHeader"
+      onMouseDown={() => moveWindow({ windowName: WindowName.IN_GAME_FULL })}
+    >
+      <Logo />
 
       <AppHeaderActions>
         <SettingsButton />
@@ -21,4 +23,4 @@ export const InGameFullAppHeader: FC = () => {
       </AppHeaderActions>
     </div>
   );
-}
+};

@@ -1,0 +1,1 @@
+import '@overwolf/types';

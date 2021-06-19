@@ -1,4 +1,4 @@
-.cache
+.parcel-cache
 dist/files
 node_modules
 *.lock

@@ -1,10 +1,10 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC } from 'react';
 import { useSelector } from 'react-redux';
 import { initStateWithPrevTab } from 'redux-state-sync';
-import { InGameMiniAppHeader } from '~components/organisms/AppHeader/InGameMiniAppHeader';
-import { MinimalLayout } from '~components/templates/MinimalLayout';
-import { useToggleAppHotkey } from '~hooks/useToggleAppHotkey';
-import { RootState, store } from '~store/store';
+import { InGameMiniAppHeader } from '~src/components/organisms/AppHeader/InGameMiniAppHeader';
+import { MinimalLayout } from '~src/components/templates/MinimalLayout';
+import { useToggleAppHotkey } from '~src/hooks/useToggleAppHotkey';
+import { RootState, store } from '~src/store/store';
 
 initStateWithPrevTab(store);
 
@@ -18,4 +18,4 @@ export const InGameMiniWindow: FC = () => {
       <p>App Ready: {hotkey}</p>
     </MinimalLayout>
   );
-}
+};

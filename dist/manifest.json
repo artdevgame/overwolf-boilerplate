@@ -22,10 +22,10 @@
       "enable_auto_refresh": true
     },
     "force_browser": "user",
-    "game_events": [10902, 5426],
+    "game_events": [10902, 5426, 10906],
     "game_targeting": {
       "type": "dedicated",
-      "game_ids": [10902, 5426]
+      "game_ids": [10902, 5426, 10906]
     },
     "hotkeys": {
       "toggle_app": {

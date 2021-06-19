@@ -1,6 +1,5 @@
 import React, { FC, useRef } from 'react';
-
-import { useAdvert } from '../../../hooks/overwolf/useAdvert';
+import { useAdvert } from '~src/hooks/overwolf/useAdvert';
 
 export const Advert: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);

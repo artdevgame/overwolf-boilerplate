@@ -1,6 +1,6 @@
 import { Button } from 'antd';
 import React, { FC, useCallback } from 'react';
-import { WindowName } from '~typescript/enums/WindowName';
+import { WindowName } from '~/src/@types/enums/WindowName';
 
 import { CloseOutlined } from '@ant-design/icons';
 
@@ -9,7 +9,5 @@ export const CloseButton: FC = () => {
     overwolf.windows.close(WindowName.BACKGROUND);
   }, []);
 
-  return (
-    <Button icon={<CloseOutlined />} onClick={onPressed} type="link" />
-  )
-}
+  return <Button icon={<CloseOutlined />} onClick={onPressed} type="link" />;
+};
