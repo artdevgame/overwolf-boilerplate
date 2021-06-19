@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { WindowName } from '~typescript/enums/WindowName';
+import { WindowName } from '~/src/@types/enums/WindowName';
 
 import { useHotkey } from './overwolf/useHotkey';
 import { useWindowManager } from './overwolf/useWindowManager';
@@ -12,8 +12,6 @@ export const useToggleAppHotkey = ({ gameId }: UseToggleAppHotkey) => {
   const [hotkey, setHotkey] = useState<string>();
   const { toggleWindow } = useWindowManager();
 
-  console.log('GAME ID', gameId)
-
   const [currentHotkey] = useHotkey({
     gameId,
     name: 'toggle_app',
@@ -22,13 +20,13 @@ export const useToggleAppHotkey = ({ gameId }: UseToggleAppHotkey) => {
     },
     onPressedCallback: () => {
       overwolf.windows.hide(WindowName.IN_GAME_MINI);
-      toggleWindow({ name: WindowName.IN_GAME_FULL });
+      toggleWindow({ windowName: WindowName.IN_GAME_FULL });
     },
   });
 
   useEffect(() => {
     setHotkey(currentHotkey);
-  }, [currentHotkey])
+  }, [currentHotkey]);
 
   return [hotkey] as const;
-}
+};

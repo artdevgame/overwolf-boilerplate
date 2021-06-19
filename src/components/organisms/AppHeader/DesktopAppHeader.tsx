@@ -14,7 +14,7 @@ import Logo from './logo.svg';
 export const DesktopAppHeader: FC = () => {
   const { moveWindow } = useWindowManager();
   return (
-    <div className='AppHeader DesktopAppHeader' onMouseDown={() => moveWindow({ name: WindowName.DESKTOP })}>
+    <div className='AppHeader DesktopAppHeader' onMouseDown={() => moveWindow({ windowName: WindowName.DESKTOP })}>
       <Logo className='AppHeader__Logo' />
 
       <AppHeaderActions>

@@ -1,37 +1,46 @@
-import { FC, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { initMessageListener } from 'redux-state-sync';
-import { useGame } from '~hooks/overwolf/useGame';
-import { useWindowManager } from '~hooks/overwolf/useWindowManager';
-import { useAppDispatch } from '~hooks/useAppDispatch';
-import { setGameId } from '~store/slices/overwolfSlice';
-import { store } from '~store/store';
-import { WindowName } from '~typescript/enums/WindowName';
+import { WindowName } from '~/src/@types/enums/WindowName';
+import { useGame } from '~/src/hooks/overwolf/useGame';
+import { useWindowManager } from '~/src/hooks/overwolf/useWindowManager';
+import { useAppDispatch } from '~/src/hooks/useAppDispatch';
+import { setGameId } from '~/src/store/slices/overwolfSlice';
+import { store } from '~/src/store/store';
 
 initMessageListener(store);
 
-export const BackgroundWindow: FC = () => {
+export function BackgroundWindow() {
   const dispatch = useAppDispatch();
+  const lastWindowOpened = useRef<overwolf.windows.WindowInfo>();
 
   const [isGameRunning, gameInfo] = useGame();
 
-  const windowManager = useWindowManager();
+  const { closeWindow, openWindow, resizeWindow } = useWindowManager();
+
+  const onWindowOpened = useCallback((windowInfo: overwolf.windows.WindowInfo) => {
+    lastWindowOpened.current = windowInfo;
+  }, []);
 
   useEffect(() => {
-    if (isGameRunning) {
-      if (typeof gameInfo !== 'undefined' && windowManager?.lastWindowOpened?.name !== WindowName.IN_GAME_MINI) {
-        dispatch(setGameId(gameInfo.classId));
+    const isGameFocused = gameInfo?.isRunning && gameInfo?.isInFocus;
 
-        windowManager.closeWindow({ name: WindowName.DESKTOP });
-        windowManager.openWindow({ name: WindowName.IN_GAME_MINI });
+    if (
+      typeof gameInfo !== 'undefined' &&
+      isGameFocused &&
+      lastWindowOpened.current?.name !== WindowName.IN_GAME_MINI
+    ) {
+      dispatch(setGameId(gameInfo.classId));
+      openWindow({ onWindowOpened, windowName: WindowName.IN_GAME_MINI });
+      return;
+    }
+
+    if (lastWindowOpened.current?.name !== WindowName.DESKTOP) {
+      if (!isGameFocused) {
+        closeWindow({ windowName: WindowName.IN_GAME_MINI });
       }
-      return
+      openWindow({ onWindowOpened, windowName: WindowName.DESKTOP });
     }
-
-    if (windowManager?.lastWindowOpened?.name !== WindowName.DESKTOP) {
-      windowManager.closeWindow({ name: WindowName.IN_GAME_MINI });
-      windowManager.openWindow({ name: WindowName.DESKTOP });
-    }
-  }, [isGameRunning, gameInfo, windowManager.lastWindowOpened]);
+  }, [isGameRunning, gameInfo, lastWindowOpened]);
 
   return null;
-};
+}

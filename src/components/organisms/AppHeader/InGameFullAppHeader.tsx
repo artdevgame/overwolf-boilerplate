@@ -12,7 +12,7 @@ import Logo from './logo.svg';
 export const InGameFullAppHeader: FC = () => {
   const { moveWindow } = useWindowManager();
   return (
-    <div className='AppHeader InGameFullAppHeader' onMouseDown={() => moveWindow({ name: WindowName.IN_GAME_MINI })}>
+    <div className='AppHeader InGameFullAppHeader' onMouseDown={() => moveWindow({ windowName: WindowName.IN_GAME_MINI })}>
       <Logo className='AppHeader__Logo' />
 
       <AppHeaderActions>

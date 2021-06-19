@@ -1,121 +1,87 @@
-import { useCallback, useEffect, useState } from 'react';
-
-interface CloseWindow {
-  name: string;
+interface GetWindowProps {
+  windowName: string;
+  windowSettings?: overwolf.windows.WindowProperties | undefined;
+}
+interface OpenWindowProps extends GetWindowProps {
+  onWindowOpened?(windowInfo: overwolf.windows.WindowInfo): void;
 }
 
-interface GetOpenWindow {
-  name: string;
+interface ResizeWindowProps extends GetWindowProps {
+  height: number;
+  width: number;
 }
 
-interface GetWindow {
-  name: string;
+type CloseWindowProps = GetWindowProps;
+type MoveWindowProps = GetWindowProps;
+type ToggleWindowProps = GetWindowProps;
+
+async function closeWindow({ windowName }: CloseWindowProps) {
+  const owWindow = await getWindow({ windowName });
+
+  overwolf.windows.close(owWindow.id);
 }
 
-interface MoveWindow {
-  name: string;
+function getCurrentWindow(): Promise<overwolf.windows.WindowInfo> {
+  return new Promise((resolve, reject) => {
+    const onWindowObtained = (result: overwolf.windows.WindowResult) => {
+      result.success ? resolve(result.window) : reject(result.error);
+    };
+
+    overwolf.windows.getCurrentWindow(onWindowObtained);
+  });
 }
 
-interface OpenWindow {
-  name: string;
-}
+function getWindow({ windowName, windowSettings }: GetWindowProps): Promise<overwolf.windows.WindowInfo> {
+  return new Promise((resolve, reject) => {
+    const onWindowObtained = (result: overwolf.windows.WindowResult) => {
+      result.success ? resolve(result.window) : reject(result.error);
+    };
 
-interface ToggleWindow {
-  name: string;
-}
-
-export const useWindowManager = () => {
-  const [lastWindowOpened, setLastWindowOpened] = useState<overwolf.windows.WindowInfo>()
-  const [domWindows, setDomWindows] = useState<overwolf.Dictionary<Window>>();
-
-  const closeWindow = useCallback(async ({ name }: CloseWindow) => {
-    const owWindow = await getWindow({ name });
-    overwolf.windows.close(owWindow.id);
-  }, []);
-
-  const getCurrentWindow = useCallback((): Promise<overwolf.windows.WindowInfo> =>
-    new Promise((resolve, reject) => {
-      overwolf.windows.getCurrentWindow(result => {
-        if (result.success) {
-          return resolve(result.window);
-        }
-
-        if (typeof result.error !== 'undefined') {
-          return reject(result.error);
-        }
-
-        return reject('Unable to fetch current window info');
-      })
-    })
-    , []);
-
-  const getDomWindow = useCallback(({ name }: GetOpenWindow) => {
-    if (typeof domWindows !== 'undefined') {
-      for (const [owWindowName, domWindow] of Object.entries(domWindows)) {
-        if (owWindowName === name) {
-          return domWindow;
-        }
-      }
+    if (typeof windowSettings !== 'undefined') {
+      overwolf.windows.obtainDeclaredWindow(windowName, windowSettings, onWindowObtained);
     }
-  }, [domWindows]);
 
-  const getWindow = useCallback(({ name }: GetWindow): Promise<overwolf.windows.WindowInfo> =>
-    new Promise((resolve, reject) => {
-      overwolf.windows.obtainDeclaredWindow(name, (result) => {
-        if (result.success) {
-          return resolve(result.window);
-        }
+    overwolf.windows.obtainDeclaredWindow(windowName, onWindowObtained);
+  });
+}
 
-        if (typeof result.error !== 'undefined') {
-          return reject(result.error);
-        }
+async function moveWindow({ windowName }: MoveWindowProps) {
+  const owWindow = await getWindow({ windowName });
 
-        return reject(`Unable to fetch window info with name: ${name}`);
-      });
-    }), []);
+  overwolf.windows.dragMove(owWindow.id);
+}
 
-  const moveWindow = useCallback(({ name }: MoveWindow) => {
-    overwolf.windows.dragMove(name);
-  }, []);
+async function openWindow({ onWindowOpened, windowName, windowSettings }: OpenWindowProps) {
+  const owWindow = await getWindow({ windowName, windowSettings });
 
-  const openWindow = useCallback(async ({ name }: OpenWindow) => {
-    const owWindow = await getWindow({ name });
-    overwolf.windows.restore(owWindow.id);
-    setLastWindowOpened(owWindow);
-  }, []);
-
-  const toggleWindow = useCallback(async ({ name }: ToggleWindow) => {
-    const owWindow = await getWindow({ name });
-
-    if (owWindow.isVisible) {
-      overwolf.windows.hide(owWindow.id);
-    } else {
+  const onWindowRestored = (result: overwolf.windows.WindowIdResult) => {
+    if (result.success) {
       overwolf.windows.restore(owWindow.id);
+      if (typeof onWindowOpened === 'function') onWindowOpened(owWindow);
     }
-  }, []);
-
-  const onWindowStateChanged = useCallback((windowState: overwolf.windows.WindowStateChangedEvent) => {
-    overwolf.windows.getOpenWindows((windows) => setDomWindows(windows));
-  }, []);
-
-  useEffect(() => {
-    overwolf.windows.onStateChanged.removeListener(onWindowStateChanged);
-    overwolf.windows.onStateChanged.addListener(onWindowStateChanged);
-
-    return () => {
-      overwolf.windows.onStateChanged.removeListener(onWindowStateChanged);
-    }
-  }, []);
-
-  return {
-    closeWindow,
-    domWindows,
-    getCurrentWindow,
-    getDomWindow,
-    getWindow,
-    lastWindowOpened,
-    moveWindow,
-    openWindow,
-    toggleWindow,
   };
-};
+
+  overwolf.windows.restore(owWindow.id, onWindowRestored);
+}
+
+async function resizeWindow({ height, width, windowName }: ResizeWindowProps) {
+  const owWindow = await getWindow({ windowName });
+
+  overwolf.windows.changeSize({ auto_dpi_resize: false, height, width, window_id: owWindow.id });
+}
+
+async function toggleWindow({ windowName }: ToggleWindowProps) {
+  const owWindow = await getWindow({ windowName });
+
+  owWindow.isVisible ? overwolf.windows.hide(owWindow.id) : openWindow({ windowName });
+}
+
+export const useWindowManager = () => ({
+  closeWindow,
+  getCurrentWindow,
+  getWindow,
+  moveWindow,
+  openWindow,
+  resizeWindow,
+  toggleWindow,
+});
